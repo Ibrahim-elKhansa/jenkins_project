@@ -31,6 +31,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
+                    // Deployment logic
                     echo "Deploying application..."
                 }
             }

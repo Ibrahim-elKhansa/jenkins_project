@@ -50,10 +50,12 @@ pipeline {
             steps {
                 script {
                     if (isUnix()) {
+                        sh "source ${VIRTUAL_ENV}/bin/activate && pip install pytest" // Ensure pytest is installed
                         sh "source ${VIRTUAL_ENV}/bin/activate && coverage run -m pytest"
                         sh "source ${VIRTUAL_ENV}/bin/activate && coverage report"
                         sh "source ${VIRTUAL_ENV}/bin/activate && coverage html"
                     } else {
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && pip install pytest" // Ensure pytest is installed
                         bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage run -m pytest"
                         bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage report"
                         bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage html"

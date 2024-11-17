@@ -41,16 +41,16 @@ pipeline {
             }
         }
         stage('Test') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh "source ${VIRTUAL_ENV}/bin/activate && pytest"
-                    } else {
-                        bat "${VIRTUAL_ENV}\\Scripts\\activate && pytest"
-                    }
+        steps {
+            script {
+                if (isUnix()) {
+                    sh "export PYTHONPATH=${env.WORKSPACE} && source ${VIRTUAL_ENV}/bin/activate && pytest"
+                } else {
+                    bat "set PYTHONPATH=${env.WORKSPACE} && ${VIRTUAL_ENV}\\Scripts\\activate && pytest"
                 }
             }
         }
+    }
         stage('Deploy') {
             steps {
                 script {

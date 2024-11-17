@@ -16,40 +16,59 @@ pipeline {
                 script {
                     if (isUnix()) {
                         sh "python -m venv ${VIRTUAL_ENV}"
+                        sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
                     } else {
                         bat "python -m venv ${VIRTUAL_ENV}"
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && pip install -r requirements.txt"
                     }
-                    sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
                 }
             }
         }
         stage('Lint') {
             steps {
                 script {
-                    sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
+                    if (isUnix()) {
+                        sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
+                    } else {
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && flake8 app.py"
+                    }
                 }
             }
         }
         stage('Test') {
             steps {
                 script {
-                    sh "set PYTHONPATH=${env.WORKSPACE} && source ${VIRTUAL_ENV}/bin/activate && pytest"
+                    if (isUnix()) {
+                        sh "export PYTHONPATH=${env.WORKSPACE} && source ${VIRTUAL_ENV}/bin/activate && pytest"
+                    } else {
+                        bat "set PYTHONPATH=${env.WORKSPACE} && ${VIRTUAL_ENV}\\Scripts\\activate && pytest"
+                    }
                 }
             }
         }
         stage('Coverage') {
             steps {
                 script {
-                    sh "set PYTHONPATH=${env.WORKSPACE} && source ${VIRTUAL_ENV}/bin/activate && coverage run -m pytest"
-                    sh "source ${VIRTUAL_ENV}/bin/activate && coverage report"
-                    sh "source ${VIRTUAL_ENV}/bin/activate && coverage html"
+                    if (isUnix()) {
+                        sh "source ${VIRTUAL_ENV}/bin/activate && coverage run -m pytest"
+                        sh "source ${VIRTUAL_ENV}/bin/activate && coverage report"
+                        sh "source ${VIRTUAL_ENV}/bin/activate && coverage html"
+                    } else {
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage run -m pytest"
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage report"
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && coverage html"
+                    }
                 }
             }
         }
         stage('Security Scan') {
             steps {
                 script {
-                    sh "source ${VIRTUAL_ENV}/bin/activate && bandit -r app/"
+                    if (isUnix()) {
+                        sh "source ${VIRTUAL_ENV}/bin/activate && bandit -r app/"
+                    } else {
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && bandit -r app/"
+                    }
                 }
             }
         }
@@ -57,6 +76,7 @@ pipeline {
             steps {
                 script {
                     echo "Deploying application..."
+                    // Add deployment logic here
                 }
             }
         }

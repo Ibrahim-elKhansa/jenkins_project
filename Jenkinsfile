@@ -4,6 +4,14 @@ pipeline {
         VIRTUAL_ENV = 'venv'
     }
     stages {
+      stage('Check Python') {
+    steps {
+        script {
+            sh "python --version || echo 'Python not found'"
+        }
+    }
+}
+
         stage('Setup') {
             steps {
                 script {

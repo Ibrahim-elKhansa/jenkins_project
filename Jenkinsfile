@@ -14,47 +14,48 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
-                    if (!fileExists("${env.WORKSPACE}/${VIRTUAL_ENV}")) {
-                        if (isUnix()) {
-                            sh "python -m venv ${VIRTUAL_ENV}"
-                        } else {
-                            bat "python -m venv ${VIRTUAL_ENV}"
-                        }
-                    }
                     if (isUnix()) {
-                        sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
+                        sh "python -m venv ${VIRTUAL_ENV}"
                     } else {
-                        bat "${VIRTUAL_ENV}\\Scripts\\activate && pip install -r requirements.txt"
+                        bat "python -m venv ${VIRTUAL_ENV}"
                     }
+                    sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
                 }
             }
         }
         stage('Lint') {
             steps {
                 script {
-                    if (isUnix()) {
-                        sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
-                    } else {
-                        bat "${VIRTUAL_ENV}\\Scripts\\activate && flake8 app.py"
-                    }
+                    sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
                 }
             }
         }
         stage('Test') {
-        steps {
-            script {
-                if (isUnix()) {
-                    sh "export PYTHONPATH=${env.WORKSPACE} && source ${VIRTUAL_ENV}/bin/activate && pytest"
-                } else {
-                    bat "set PYTHONPATH=${env.WORKSPACE} && ${VIRTUAL_ENV}\\Scripts\\activate && pytest"
+            steps {
+                script {
+                    sh "set PYTHONPATH=${env.WORKSPACE} && source ${VIRTUAL_ENV}/bin/activate && pytest"
                 }
             }
         }
-    }
+        stage('Coverage') {
+            steps {
+                script {
+                    sh "set PYTHONPATH=${env.WORKSPACE} && source ${VIRTUAL_ENV}/bin/activate && coverage run -m pytest"
+                    sh "source ${VIRTUAL_ENV}/bin/activate && coverage report"
+                    sh "source ${VIRTUAL_ENV}/bin/activate && coverage html"
+                }
+            }
+        }
+        stage('Security Scan') {
+            steps {
+                script {
+                    sh "source ${VIRTUAL_ENV}/bin/activate && bandit -r app/"
+                }
+            }
+        }
         stage('Deploy') {
             steps {
                 script {
-                    // Deployment logic
                     echo "Deploying application..."
                 }
             }

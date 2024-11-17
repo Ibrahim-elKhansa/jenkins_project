@@ -4,35 +4,50 @@ pipeline {
         VIRTUAL_ENV = 'venv'
     }
     stages {
-      stage('Check Python') {
-    steps {
-        script {
-            sh "python --version || echo 'Python not found'"
+        stage('Check Python') {
+            steps {
+                script {
+                    sh "python --version || echo 'Python not found'"
+                }
+            }
         }
-    }
-}
-
         stage('Setup') {
             steps {
                 script {
                     if (!fileExists("${env.WORKSPACE}/${VIRTUAL_ENV}")) {
-                        sh "python -m venv ${VIRTUAL_ENV}"
+                        if (isUnix()) {
+                            sh "python -m venv ${VIRTUAL_ENV}"
+                        } else {
+                            bat "python -m venv ${VIRTUAL_ENV}"
+                        }
                     }
-                    sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
+                    if (isUnix()) {
+                        sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
+                    } else {
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && pip install -r requirements.txt"
+                    }
                 }
             }
         }
         stage('Lint') {
             steps {
                 script {
-                    sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
+                    if (isUnix()) {
+                        sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
+                    } else {
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && flake8 app.py"
+                    }
                 }
             }
         }
         stage('Test') {
             steps {
                 script {
-                    sh "source ${VIRTUAL_ENV}/bin/activate && pytest"
+                    if (isUnix()) {
+                        sh "source ${VIRTUAL_ENV}/bin/activate && pytest"
+                    } else {
+                        bat "${VIRTUAL_ENV}\\Scripts\\activate && pytest"
+                    }
                 }
             }
         }
